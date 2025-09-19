@@ -1,14 +1,14 @@
 /*
-  calendar-aggregate-card.js
+  ha-calendar-occupancy.js
   A Lovelace custom card that shows a calendar view aggregating multiple calendar entities.
 
   Install:
-  1) Save this file as /config/www/calendar-aggregate-card.js
+  1) Save this file as /config/www/ha-calendar-occupancy.js
   2) In Home Assistant: Settings → Dashboards → (top-right) ⋮ → Manage resources → Add resource
-     URL: /local/calendar-aggregate-card.js  Type: JavaScript Module
+     URL: /local/ha-calendar-occupancy.js  Type: JavaScript Module
   3) In your dashboard, add a Manual card with:
 
-  type: 'custom:calendar-aggregate-card'
+  type: 'custom:ha-calendar-occupancy'
   title: Calendario
   entities:
     - calendar.family
@@ -260,14 +260,14 @@ class CalendarAggregateCard extends LitElement {
   }
 
   static getConfigElement() {
-    return document.createElement("calendar-aggregate-card-editor");
+    return document.createElement("ha-calendar-occupancy-editor");
   }
 
   static getManifest() {
     return {
       type: "object",
       properties: {
-        type: { const: "custom:calendar-aggregate-card" },
+        type: { const: "custom:ha-calendar-occupancy" },
         title: { type: "string" },
         entities: { type: "array", items: { type: "string" }, minItems: 1 },
         view: { type: "string", enum: ["month", "agenda"] },
@@ -279,11 +279,11 @@ class CalendarAggregateCard extends LitElement {
 
   static getStubConfig(hass, entities) {
     const calendars = (entities || []).filter((e) => e.startsWith("calendar."));
-    return { type: "custom:calendar-aggregate-card", title: "Calendario", entities: calendars.slice(0, 2) };
+    return { type: "custom:ha-calendar-occupancy", title: "Calendario", entities: calendars.slice(0, 2) };
   }
 }
 
-customElements.define("calendar-aggregate-card", CalendarAggregateCard);
+customElements.define("ha-calendar-occupancy", CalendarAggregateCard);
 
 class CalendarAggregateCardEditor extends LitElement {
   static get properties() {
@@ -356,10 +356,10 @@ class CalendarAggregateCardEditor extends LitElement {
   }
 }
 
-customElements.define("calendar-aggregate-card-editor", CalendarAggregateCardEditor);
+customElements.define("ha-calendar-occupancy-editor", CalendarAggregateCardEditor);
 
 console.info(
-  `%c CALENDAR-AGGREGATE-CARD %c v${CARD_VERSION}`,
+  `%c ha-calendar-occupancy %c v${CARD_VERSION}`,
   "background:#0b5; color:white; padding:2px 6px; border-radius:4px;",
   "color:#0b5"
 );
