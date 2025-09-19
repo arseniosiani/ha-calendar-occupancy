@@ -24,7 +24,7 @@ const start = async () => {
 
 
   const build_opts = {
-    entryPoints: ['./ha-calendar-occupancy.js'],
+    entryPoints: ['./src/ha-calendar-occupancy.js'],
     bundle: true,
     minify: false,
     platform: 'browser',
