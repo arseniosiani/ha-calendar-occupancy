@@ -25,7 +25,7 @@
 
 // Use Lit from HA (available to custom cards) without external imports
 const Lit = window.litHtml || window.Lit || window.litElement || window.lit;
-const { LitElement, html, css, nothing } = window.LitElement
+const { LitElement, html, css, nothing } = Lit
   ? { LitElement: window.LitElement, html: window.html, css: window.css, nothing: window.nothing }
   : Lit || {};
 
