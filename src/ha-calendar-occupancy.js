@@ -51,7 +51,9 @@ class CalendarOccupancy extends HTMLElement {
     );
 
     const results = await Promise.all(promises);
+    console.log({ results })
     const all = results.flat();
+    console.log({ all })
 
     const marked = new Set();
     for (const ev of all) {
@@ -67,6 +69,7 @@ class CalendarOccupancy extends HTMLElement {
         day = day.add(1, 'day');
       }
     }
+    console.log(marked)
     return marked;
   }
 

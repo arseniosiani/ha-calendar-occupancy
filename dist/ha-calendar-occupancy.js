@@ -331,7 +331,7 @@ var require_localizedFormat = __commonJS({
   }
 });
 
-// ha-calendar-occupancy.js
+// src/ha-calendar-occupancy.js
 var import_dayjs = __toESM(require_dayjs_min());
 var import_localizedFormat = __toESM(require_localizedFormat());
 import_dayjs.default.extend(import_localizedFormat.default);
@@ -377,7 +377,9 @@ var CalendarOccupancy = class extends HTMLElement {
       }).catch(() => [])
     );
     const results = await Promise.all(promises);
+    console.log({ results });
     const all = results.flat();
+    console.log({ all });
     const marked = /* @__PURE__ */ new Set();
     for (const ev of all) {
       const start = (0, import_dayjs.default)(ev.start);
@@ -392,6 +394,7 @@ var CalendarOccupancy = class extends HTMLElement {
         day = day.add(1, "day");
       }
     }
+    console.log(marked);
     return marked;
   }
   async _ensureMonthData(hass) {
