@@ -1,0 +1,9 @@
+{
+  "name": "ha-calendar-occupancy",
+  "packageManager": "yarn@3.2.0",
+  "dependencies": {
+    "dayjs": "^1.11.18",
+    "esbuild": "^0.25.10",
+    "fs-extra": "^11.3.2"
+  }
+}
