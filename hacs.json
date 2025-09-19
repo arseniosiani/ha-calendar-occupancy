@@ -1,6 +1,5 @@
 {
   "name": "Calendar Aggregate Card",
-  "content_in_root": true,
   "filename": "ha-calendar-occupancy.js",
   "render_readme": true,
   "domains": [],
