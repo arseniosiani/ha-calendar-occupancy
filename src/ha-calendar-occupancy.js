@@ -1,5 +1,10 @@
-import dayjs from 'dayjs';
-import localizedFormat from 'dayjs/plugin/localizedFormat';
+import dayjs from 'dayjs'
+import localizedFormat from 'dayjs/plugin/localizedFormat'
+import isoWeek from 'dayjs/plugin/isoWeek' // ES 2015
+import 'dayjs/locale/it'
+
+dayjs.locale('it')
+dayjs.extend(isoWeek);
 dayjs.extend(localizedFormat);
 
 class CalendarOccupancy extends HTMLElement {
@@ -14,85 +19,24 @@ class CalendarOccupancy extends HTMLElement {
       throw new Error('Please define "entities" as an array');
     }
     this.config = {
-      start_on_monday: true,
-      month_offset: 0, // 0 = current month
+      future_weeks: 20,
+      past_weeks: 1,
       ...config,
     };
   }
 
-  _keyFor(date) {
-    return dayjs(date).format('YYYY-MM-DD');
-  }
-
-  _monthFrame(baseDate) {
-    const viewDate = dayjs(baseDate).add(this.config.month_offset || 0, 'month').startOf('month');
-    const monthStart = viewDate.startOf('month');
-    const monthEnd = viewDate.endOf('month');
-
-    const startOnMonday = this.config.start_on_monday !== false;
-    const dow = monthStart.day(); // 0 Sun - 6 Sat
-    const shift = startOnMonday ? ((dow + 6) % 7) : dow;
-    const gridStart = monthStart.subtract(shift, 'day');
-
-    return { viewDate, monthStart, monthEnd, gridStart };
-  }
-
-  async _loadEventsForMonth(hass, entities, monthStart, monthEnd) {
-    const startISO = monthStart.startOf('day').toISOString();
-    const endISO = monthEnd.endOf('day').toISOString();
-
-    const promises = entities.map((entity_id) =>
-      hass.callWS({
-        type: 'calendar/list_events',
-        entity_id,
-        start_time: startISO,
-        end_time: endISO,
-      }).catch(() => [])
-    );
-
-    const results = await Promise.all(promises);
-    console.log({ results })
-    const all = results.flat();
-    console.log({ all })
-
-    const marked = new Set();
-    for (const ev of all) {
-      const start = dayjs(ev.start);
-      const end = dayjs(ev.end);
-      let day = start.startOf('day');
-      let last = end.startOf('day');
-      if (end.hour() === 0 && end.minute() === 0 && end.second() === 0) {
-        last = last.subtract(1, 'day');
-      }
-      while (day.isSameOrBefore(last, 'day')) {
-        marked.add(this._keyFor(day));
-        day = day.add(1, 'day');
-      }
-    }
-    console.log(marked)
-    return marked;
-  }
-
-  async _ensureMonthData(hass) {
-    const baseNow = dayjs();
-    const { viewDate, monthStart, monthEnd, gridStart } = this._monthFrame(baseNow);
-    const monthKey = viewDate.format('YYYY-MM');
-
-    if (this._fetching || this._monthKey === monthKey) return { viewDate, monthStart, monthEnd, gridStart };
-
-    this._fetching = true;
-    try {
-      const marked = await this._loadEventsForMonth(hass, this.config.entities, monthStart, monthEnd);
-      this._eventsIndex = marked;
-      this._monthKey = monthKey;
-    } finally {
-      this._fetching = false;
-    }
-    return { viewDate, monthStart, monthEnd, gridStart };
-  }
 
   set hass(hass) {
     const { entities } = this.config;
+    const colors = [
+      "var(--red-color)",
+      "var(--pink-color)",
+      "var(--purple-color)",
+      "var(--deep-purple-color)",
+      "var(--indigo-color)",
+      "var(--blue-color)",
+      "var(--light-blue-color)",
+    ]
 
     if (!this.content) {
       const title = this.config.title || 'Occupancy';
@@ -102,34 +46,78 @@ class CalendarOccupancy extends HTMLElement {
             .calendar {
               display: grid;
               grid-template-columns: repeat(7, 1fr);
-              gap: 6px;
-              padding: 6px;
+              gap: 1px;
+              padding: 1px;
+              background-color: var(--ha-color-neutral-60);
             }
             .weekday {
               font-weight: 600;
               text-align: center;
-              opacity: 0.7;
               font-size: 0.9em;
+              background: var(--card-background-color);
             }
             .day {
+              color: rgba(255,255,255,0.5);
               position: relative;
-              border-radius: 8px;
-              padding: 8px;
               min-height: 48px;
               display: flex;
               align-items: flex-start;
-              justify-content: flex-end;
-              background: var(--ha-card-background, rgba(0,0,0,0.04));
+              justify-content: center;
+              background: var(--card-background-color);
             }
-            .day.out { opacity: 0.5; }
+            .day.past { opacity: 0.75; }
+            .today {
+              background: var(--ha-color-primary-10);
+            }
             .num { font-size: 0.95em; }
-            .dot {
+            .top_1 {
+              top: 20px;
+              background: ${colors[0]};
+            }
+            .top_2 {
+              top: 30px;
+              background: ${colors[1]};
+            }
+            .top_3 {
+              top: 40px;
+              background: ${colors[2]};
+            }
+            .block {
+              filter: brightness(0.75);
+            }
+            .bar_null {
               position: absolute;
-              left: 8px;
+              left: -1px;
               bottom: 8px;
-              width: 8px; height: 8px;
-              border-radius: 50%;
-              background: var(--primary-color);
+              width: 102%;
+              height: 8px;
+              background: none;
+
+            }
+            .bar_fill {
+              position: absolute;
+              left: -1px;
+              bottom: 8px;
+              width: 102%;
+              height: 8px;
+            }
+            .bar_enter {
+              position: absolute;
+              left: 55%;
+              bottom: 8px;
+              width: 46%;
+              height: 8px;
+              border-top-left-radius: 4px;
+              border-bottom-left-radius: 4px;
+            }
+            .bar_leave {
+              position: absolute;
+              left: -1px;
+              bottom: 8px;
+              width: 45%;
+              height: 8px;
+              border-top-right-radius: 4px;
+              border-bottom-right-radius: 4px;
             }
             .month-title { padding: 8px 12px 0; font-weight: 600; }
           </style>
@@ -145,34 +133,50 @@ class CalendarOccupancy extends HTMLElement {
   }
 
   async _render(hass, entities) {
-    const { viewDate, gridStart } = await this._ensureMonthData(hass);
+    const grid = await getData(hass, entities, this.config.past_weeks, this.config.future_weeks)
 
-    const monthName = viewDate.locale(hass.locale?.language || undefined).format('MMMM YYYY');
+    const monthName = "AAAA" //viewDate.locale(hass.locale?.language || undefined).format('MMMM YYYY');
     this._titleEl.textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-
-    const startOnMonday = this.config.start_on_monday !== false;
-    const dayNames = [];
-    let base = dayjs().day(0); // Sunday of current week
-    for (let i = 0; i < 7; i++) {
-      const d = startOnMonday ? base.add(i + 1, 'day') : base.add(i, 'day');
-      dayNames.push(d.locale(hass.locale?.language || undefined).format('dd'));
-    }
+    const dayNames = [
+      "lun",
+      "mar",
+      "mer",
+      "gio",
+      "ven",
+      "sab",
+      "dom",
+    ];
 
     const cells = [];
-    let day = gridStart;
-    for (let i = 0; i < 42; i++) {
-      const inMonth = day.month() === viewDate.month();
-      const key = this._keyFor(day);
-      const hasEvent = this._eventsIndex.has(key);
+    for (const date in grid) {
+      const bars = []
+      const cals = grid[date].cals || []
+      let top = 0
+      for (const cal_id of entities) {
+        top++
+        if (!cals[cal_id]) {
+          bars.push(`<span class="bar_null top_${top}"></span>`)
+        }
+        for (const piece of cals[cal_id] || []) {
+          const fragment = piece.event
+          const { occupancy, summary } = piece
+          bars.push(`<span class="bar_${fragment} top_${top} ${occupancy}" title="${summary}"></span>`)
+        }
+      }
+      const past = dayjs(date).format("YYMMDD") < dayjs().format("YYMMDD") ? "past" : ''
+      const today = dayjs(date).format("YYMMDD") === dayjs().format("YYMMDD") ? "today" : ''
+
+      let label = dayjs(date).format("D")
+      if (label === "1") {
+        label = dayjs(date).format("MMM D")
+      }
       cells.push(`
-        <div class="day ${inMonth ? '' : 'out'}" data-date="${key}">
-          <span class="num">${day.date()}</span>
-          ${hasEvent ? '<span class="dot"></span>' : ''}
+        <div class="day ${today} ${past}" data-date="${date}">
+          <span class="num">${label.toUpperCase()}</span>
+          ${bars.join("")}
         </div>
       `);
-      day = day.add(1, 'day');
     }
-
     this.content.innerHTML = [
       dayNames.map((w) => `<div class="weekday">${w}</div>`).join(''),
       cells.join(''),
@@ -181,3 +185,78 @@ class CalendarOccupancy extends HTMLElement {
 }
 
 customElements.define('ha-calendar-occupancy', CalendarOccupancy);
+
+const getGrid = (n_past, n_future) => {
+  const today = dayjs()
+  const start = today.add(n_past * 7 * -1, 'days').startOf("isoWeek")
+  const num_cells = n_past * 7 + 7 + n_future * 7
+  const days = {}
+  for (let i = 0; i < num_cells; i++) {
+    const day = start.add(i, 'days')
+    days[day.format("YYYY-MM-DD")] = {
+      date: day.format("YYYY-MM-DD")
+    }
+  }
+  return days
+}
+
+const loadEvents = async (hass, entities, grid) => {
+  const dates = Object.values(grid).map(d => d.date)
+  const startISO = dayjs(dates[0]).startOf('day').toISOString();
+  const endISO = dayjs(dates[dates.length - 1]).endOf('day').toISOString();
+
+  for (const entity_id of entities) {
+    const events = await hass.callApi(
+      "GET",
+      `calendars/${entity_id}${encodeURI(`?start=${startISO}&end=${endISO}`)}`
+    )
+    for (const ev of events) {
+      const start = ev.start.date
+      const end = ev.end.date
+      let done = false
+      let i_day = 0
+      while (!done) {
+        const day = dayjs(start).add(i_day, 'days').format("YYYY-MM-DD")
+        if (day === end) {
+          done = true
+        }
+        let type = "fill"
+        if (i_day === 0) {
+          type = 'enter'
+        }
+        if (done) {
+          type = 'leave'
+        }
+        if (grid[day]) {
+          if (!grid[day].cals) {
+            grid[day].cals = {}
+          }
+
+          console.log(ev)
+          const { summary } = ev
+          let occupancy = 'block'
+          if (summary.toLowerCase().match(/reserved/)) {
+            occupancy = 'reserved'
+          }
+
+          if (!grid[day].cals[entity_id]) {
+            grid[day].cals[entity_id] = []
+          }
+          grid[day].cals[entity_id].push({
+            event: type,
+            occupancy: occupancy,
+            summary
+          })
+        }
+        i_day++
+      }
+    }
+  }
+  console.log({ grid })
+}
+
+const getData = async (hass, entities, past_weeks, future_weeks) => {
+  const grid = getGrid(past_weeks, future_weeks)
+  await loadEvents(hass, entities, grid);
+  return grid
+}

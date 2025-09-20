@@ -331,9 +331,62 @@ var require_localizedFormat = __commonJS({
   }
 });
 
+// node_modules/dayjs/plugin/isoWeek.js
+var require_isoWeek = __commonJS({
+  "node_modules/dayjs/plugin/isoWeek.js"(exports, module2) {
+    !(function(e, t) {
+      "object" == typeof exports && "undefined" != typeof module2 ? module2.exports = t() : "function" == typeof define && define.amd ? define(t) : (e = "undefined" != typeof globalThis ? globalThis : e || self).dayjs_plugin_isoWeek = t();
+    })(exports, (function() {
+      "use strict";
+      var e = "day";
+      return function(t, i, s) {
+        var a = function(t2) {
+          return t2.add(4 - t2.isoWeekday(), e);
+        }, d = i.prototype;
+        d.isoWeekYear = function() {
+          return a(this).year();
+        }, d.isoWeek = function(t2) {
+          if (!this.$utils().u(t2)) return this.add(7 * (t2 - this.isoWeek()), e);
+          var i2, d2, n2, o, r = a(this), u = (i2 = this.isoWeekYear(), d2 = this.$u, n2 = (d2 ? s.utc : s)().year(i2).startOf("year"), o = 4 - n2.isoWeekday(), n2.isoWeekday() > 4 && (o += 7), n2.add(o, e));
+          return r.diff(u, "week") + 1;
+        }, d.isoWeekday = function(e2) {
+          return this.$utils().u(e2) ? this.day() || 7 : this.day(this.day() % 7 ? e2 : e2 - 7);
+        };
+        var n = d.startOf;
+        d.startOf = function(e2, t2) {
+          var i2 = this.$utils(), s2 = !!i2.u(t2) || t2;
+          return "isoweek" === i2.p(e2) ? s2 ? this.date(this.date() - (this.isoWeekday() - 1)).startOf("day") : this.date(this.date() - 1 - (this.isoWeekday() - 1) + 7).endOf("day") : n.bind(this)(e2, t2);
+        };
+      };
+    }));
+  }
+});
+
+// node_modules/dayjs/locale/it.js
+var require_it = __commonJS({
+  "node_modules/dayjs/locale/it.js"(exports, module2) {
+    !(function(e, o) {
+      "object" == typeof exports && "undefined" != typeof module2 ? module2.exports = o(require_dayjs_min()) : "function" == typeof define && define.amd ? define(["dayjs"], o) : (e = "undefined" != typeof globalThis ? globalThis : e || self).dayjs_locale_it = o(e.dayjs);
+    })(exports, (function(e) {
+      "use strict";
+      function o(e2) {
+        return e2 && "object" == typeof e2 && "default" in e2 ? e2 : { default: e2 };
+      }
+      var t = o(e), n = { name: "it", weekdays: "domenica_luned\xEC_marted\xEC_mercoled\xEC_gioved\xEC_venerd\xEC_sabato".split("_"), weekdaysShort: "dom_lun_mar_mer_gio_ven_sab".split("_"), weekdaysMin: "do_lu_ma_me_gi_ve_sa".split("_"), months: "gennaio_febbraio_marzo_aprile_maggio_giugno_luglio_agosto_settembre_ottobre_novembre_dicembre".split("_"), weekStart: 1, monthsShort: "gen_feb_mar_apr_mag_giu_lug_ago_set_ott_nov_dic".split("_"), formats: { LT: "HH:mm", LTS: "HH:mm:ss", L: "DD/MM/YYYY", LL: "D MMMM YYYY", LLL: "D MMMM YYYY HH:mm", LLLL: "dddd D MMMM YYYY HH:mm" }, relativeTime: { future: "tra %s", past: "%s fa", s: "qualche secondo", m: "un minuto", mm: "%d minuti", h: "un' ora", hh: "%d ore", d: "un giorno", dd: "%d giorni", M: "un mese", MM: "%d mesi", y: "un anno", yy: "%d anni" }, ordinal: function(e2) {
+        return e2 + "\xBA";
+      } };
+      return t.default.locale(n, null, true), n;
+    }));
+  }
+});
+
 // src/ha-calendar-occupancy.js
 var import_dayjs = __toESM(require_dayjs_min());
 var import_localizedFormat = __toESM(require_localizedFormat());
+var import_isoWeek = __toESM(require_isoWeek());
+var import_it = __toESM(require_it());
+import_dayjs.default.locale("it");
+import_dayjs.default.extend(import_isoWeek.default);
 import_dayjs.default.extend(import_localizedFormat.default);
 var CalendarOccupancy = class extends HTMLElement {
   config;
@@ -346,74 +399,22 @@ var CalendarOccupancy = class extends HTMLElement {
       throw new Error('Please define "entities" as an array');
     }
     this.config = {
-      start_on_monday: true,
-      month_offset: 0,
-      // 0 = current month
+      future_weeks: 20,
+      past_weeks: 1,
       ...config
     };
   }
-  _keyFor(date) {
-    return (0, import_dayjs.default)(date).format("YYYY-MM-DD");
-  }
-  _monthFrame(baseDate) {
-    const viewDate = (0, import_dayjs.default)(baseDate).add(this.config.month_offset || 0, "month").startOf("month");
-    const monthStart = viewDate.startOf("month");
-    const monthEnd = viewDate.endOf("month");
-    const startOnMonday = this.config.start_on_monday !== false;
-    const dow = monthStart.day();
-    const shift = startOnMonday ? (dow + 6) % 7 : dow;
-    const gridStart = monthStart.subtract(shift, "day");
-    return { viewDate, monthStart, monthEnd, gridStart };
-  }
-  async _loadEventsForMonth(hass, entities, monthStart, monthEnd) {
-    const startISO = monthStart.startOf("day").toISOString();
-    const endISO = monthEnd.endOf("day").toISOString();
-    const promises = entities.map(
-      (entity_id) => hass.callWS({
-        type: "calendar/list_events",
-        entity_id,
-        start_time: startISO,
-        end_time: endISO
-      }).catch(() => [])
-    );
-    const results = await Promise.all(promises);
-    console.log({ results });
-    const all = results.flat();
-    console.log({ all });
-    const marked = /* @__PURE__ */ new Set();
-    for (const ev of all) {
-      const start = (0, import_dayjs.default)(ev.start);
-      const end = (0, import_dayjs.default)(ev.end);
-      let day = start.startOf("day");
-      let last = end.startOf("day");
-      if (end.hour() === 0 && end.minute() === 0 && end.second() === 0) {
-        last = last.subtract(1, "day");
-      }
-      while (day.isSameOrBefore(last, "day")) {
-        marked.add(this._keyFor(day));
-        day = day.add(1, "day");
-      }
-    }
-    console.log(marked);
-    return marked;
-  }
-  async _ensureMonthData(hass) {
-    const baseNow = (0, import_dayjs.default)();
-    const { viewDate, monthStart, monthEnd, gridStart } = this._monthFrame(baseNow);
-    const monthKey = viewDate.format("YYYY-MM");
-    if (this._fetching || this._monthKey === monthKey) return { viewDate, monthStart, monthEnd, gridStart };
-    this._fetching = true;
-    try {
-      const marked = await this._loadEventsForMonth(hass, this.config.entities, monthStart, monthEnd);
-      this._eventsIndex = marked;
-      this._monthKey = monthKey;
-    } finally {
-      this._fetching = false;
-    }
-    return { viewDate, monthStart, monthEnd, gridStart };
-  }
   set hass(hass) {
     const { entities } = this.config;
+    let colors = [
+      "var(--red-color)",
+      "var(--pink-color)",
+      "var(--purple-color)",
+      "var(--deep-purple-color)",
+      "var(--indigo-color)",
+      "var(--blue-color)",
+      "var(--light-blue-color)"
+    ];
     if (!this.content) {
       const title = this.config.title || "Occupancy";
       this.innerHTML = `
@@ -422,34 +423,78 @@ var CalendarOccupancy = class extends HTMLElement {
             .calendar {
               display: grid;
               grid-template-columns: repeat(7, 1fr);
-              gap: 6px;
-              padding: 6px;
+              gap: 1px;
+              padding: 1px;
+              background-color: var(--ha-color-neutral-60);
             }
             .weekday {
               font-weight: 600;
               text-align: center;
-              opacity: 0.7;
               font-size: 0.9em;
+              background: var(--card-background-color);
             }
             .day {
+              color: rgba(255,255,255,0.5);
               position: relative;
-              border-radius: 8px;
-              padding: 8px;
               min-height: 48px;
               display: flex;
               align-items: flex-start;
-              justify-content: flex-end;
-              background: var(--ha-card-background, rgba(0,0,0,0.04));
+              justify-content: center;
+              background: var(--card-background-color);
             }
-            .day.out { opacity: 0.5; }
+            .day.past { opacity: 0.75; }
+            .today {
+              background: var(--ha-color-primary-10);
+            }
             .num { font-size: 0.95em; }
-            .dot {
+            .top_1 {
+              top: 20px;
+              background: ${colors[0]};
+            }
+            .top_2 {
+              top: 30px;
+              background: ${colors[1]};
+            }
+            .top_3 {
+              top: 40px;
+              background: ${colors[2]};
+            }
+            .block {
+              filter: brightness(0.75);
+            }
+            .bar_null {
               position: absolute;
-              left: 8px;
+              left: -1px;
               bottom: 8px;
-              width: 8px; height: 8px;
-              border-radius: 50%;
-              background: var(--primary-color);
+              width: 102%;
+              height: 8px;
+              background: none;
+
+            }
+            .bar_fill {
+              position: absolute;
+              left: -1px;
+              bottom: 8px;
+              width: 102%;
+              height: 8px;
+            }
+            .bar_enter {
+              position: absolute;
+              left: 55%;
+              bottom: 8px;
+              width: 46%;
+              height: 8px;
+              border-top-left-radius: 4px;
+              border-bottom-left-radius: 4px;
+            }
+            .bar_leave {
+              position: absolute;
+              left: -1px;
+              bottom: 8px;
+              width: 45%;
+              height: 8px;
+              border-top-right-radius: 4px;
+              border-bottom-right-radius: 4px;
             }
             .month-title { padding: 8px 12px 0; font-weight: 600; }
           </style>
@@ -463,8 +508,9 @@ var CalendarOccupancy = class extends HTMLElement {
     this._render(hass, entities);
   }
   async _render(hass, entities) {
-    const { viewDate, gridStart } = await this._ensureMonthData(hass);
-    const monthName = viewDate.locale(hass.locale?.language || void 0).format("MMMM YYYY");
+    const grid = await getData(hass, entities, this.config.past_weeks, this.config.future_weeks);
+    console.log({ grid });
+    const monthName = "AAAA";
     this._titleEl.textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1);
     const startOnMonday = this.config.start_on_monday !== false;
     const dayNames = [];
@@ -474,18 +520,33 @@ var CalendarOccupancy = class extends HTMLElement {
       dayNames.push(d.locale(hass.locale?.language || void 0).format("dd"));
     }
     const cells = [];
-    let day = gridStart;
-    for (let i = 0; i < 42; i++) {
-      const inMonth = day.month() === viewDate.month();
-      const key = this._keyFor(day);
-      const hasEvent = this._eventsIndex.has(key);
+    for (const date in grid) {
+      let bars = [];
+      const cals = grid[date].cals || [];
+      let top = 0;
+      for (const cal_id of entities) {
+        top++;
+        if (!cals[cal_id]) {
+          bars.push(`<span class="bar_null top_${top}"></span>`);
+        }
+        for (const piece of cals[cal_id] || []) {
+          const fragment = piece.event;
+          const { occupancy, summary } = piece;
+          bars.push(`<span class="bar_${fragment} top_${top} ${occupancy}" title="${summary}"></span>`);
+        }
+      }
+      const past = (0, import_dayjs.default)(date).format("YYMMDD") < (0, import_dayjs.default)().format("YYMMDD") ? "past" : "";
+      const today = (0, import_dayjs.default)(date).format("YYMMDD") === (0, import_dayjs.default)().format("YYMMDD") ? "today" : "";
+      let label = (0, import_dayjs.default)(date).format("D");
+      if (label === "1") {
+        label = (0, import_dayjs.default)(date).format("MMM D");
+      }
       cells.push(`
-        <div class="day ${inMonth ? "" : "out"}" data-date="${key}">
-          <span class="num">${day.date()}</span>
-          ${hasEvent ? '<span class="dot"></span>' : ""}
+        <div class="day ${today} ${past}" data-date="${date}">
+          <span class="num">${label.toUpperCase()}</span>
+          ${bars.join("")}
         </div>
       `);
-      day = day.add(1, "day");
     }
     this.content.innerHTML = [
       dayNames.map((w) => `<div class="weekday">${w}</div>`).join(""),
@@ -494,3 +555,72 @@ var CalendarOccupancy = class extends HTMLElement {
   }
 };
 customElements.define("ha-calendar-occupancy", CalendarOccupancy);
+var getGrid = (n_past, n_future) => {
+  const today = (0, import_dayjs.default)();
+  const start = today.add(n_past * 7 * -1, "days").startOf("isoWeek");
+  const num_cells = n_past * 7 + 7 + n_future * 7;
+  const days = {};
+  for (let i = 0; i < num_cells; i++) {
+    const day = start.add(i, "days");
+    days[day.format("YYYY-MM-DD")] = {
+      date: day.format("YYYY-MM-DD")
+    };
+  }
+  return days;
+};
+var loadEvents = async (hass, entities, grid) => {
+  const dates = Object.values(grid).map((d) => d.date);
+  const startISO = (0, import_dayjs.default)(dates[0]).startOf("day").toISOString();
+  const endISO = (0, import_dayjs.default)(dates[dates.length - 1]).endOf("day").toISOString();
+  for (const entity_id of entities) {
+    const events = await hass.callApi(
+      "GET",
+      `calendars/${entity_id}${encodeURI(`?start=${startISO}&end=${endISO}`)}`
+    );
+    for (const ev of events) {
+      const start = ev.start.date;
+      const end = ev.end.date;
+      let done = false;
+      let i_day = 0;
+      while (!done) {
+        const day = (0, import_dayjs.default)(start).add(i_day, "days").format("YYYY-MM-DD");
+        if (day === end) {
+          done = true;
+        }
+        let type = "fill";
+        if (i_day === 0) {
+          type = "enter";
+        }
+        if (done) {
+          type = "leave";
+        }
+        if (grid[day]) {
+          if (!grid[day].cals) {
+            grid[day].cals = {};
+          }
+          console.log(ev);
+          const { summary } = ev;
+          let occupancy = "block";
+          if (summary.toLowerCase().match(/reserved/)) {
+            occupancy = "reserved";
+          }
+          if (!grid[day].cals[entity_id]) {
+            grid[day].cals[entity_id] = [];
+          }
+          grid[day].cals[entity_id].push({
+            event: type,
+            occupancy,
+            summary
+          });
+        }
+        i_day++;
+      }
+    }
+  }
+  console.log({ grid });
+};
+var getData = async (hass, entities, past_weeks, future_weeks) => {
+  const grid = getGrid(past_weeks, future_weeks);
+  await loadEvents(hass, entities, grid);
+  return grid;
+};

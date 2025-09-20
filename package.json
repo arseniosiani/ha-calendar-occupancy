@@ -2,8 +2,10 @@
   "name": "ha-calendar-occupancy",
   "packageManager": "yarn@3.2.0",
   "dependencies": {
+    "@biomejs/biome": "^2.2.4",
     "dayjs": "^1.11.18",
     "esbuild": "^0.25.10",
-    "fs-extra": "^11.3.2"
+    "fs-extra": "^11.3.2",
+    "serve": "^14.2.5"
   }
 }
