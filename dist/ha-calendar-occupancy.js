@@ -406,17 +406,17 @@ var CalendarOccupancy = class extends HTMLElement {
   }
   set hass(hass) {
     const { entities } = this.config;
-    let colors = [
+    const colors = [
       "var(--red-color)",
+      "var(--blue-color)",
       "var(--pink-color)",
       "var(--purple-color)",
       "var(--deep-purple-color)",
       "var(--indigo-color)",
-      "var(--blue-color)",
       "var(--light-blue-color)"
     ];
     if (!this.content) {
-      const title = this.config.title || "Occupancy";
+      const title = this.config.title || "";
       this.innerHTML = `
         <ha-card header="${title}">
           <style>
@@ -509,19 +509,18 @@ var CalendarOccupancy = class extends HTMLElement {
   }
   async _render(hass, entities) {
     const grid = await getData(hass, entities, this.config.past_weeks, this.config.future_weeks);
-    console.log({ grid });
-    const monthName = "AAAA";
-    this._titleEl.textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-    const startOnMonday = this.config.start_on_monday !== false;
-    const dayNames = [];
-    let base = (0, import_dayjs.default)().day(0);
-    for (let i = 0; i < 7; i++) {
-      const d = startOnMonday ? base.add(i + 1, "day") : base.add(i, "day");
-      dayNames.push(d.locale(hass.locale?.language || void 0).format("dd"));
-    }
+    const dayNames = [
+      "lun",
+      "mar",
+      "mer",
+      "gio",
+      "ven",
+      "sab",
+      "dom"
+    ];
     const cells = [];
     for (const date in grid) {
-      let bars = [];
+      const bars = [];
       const cals = grid[date].cals || [];
       let top = 0;
       for (const cal_id of entities) {

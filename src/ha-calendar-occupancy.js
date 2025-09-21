@@ -30,16 +30,16 @@ class CalendarOccupancy extends HTMLElement {
     const { entities } = this.config;
     const colors = [
       "var(--red-color)",
+      "var(--blue-color)",
       "var(--pink-color)",
       "var(--purple-color)",
       "var(--deep-purple-color)",
       "var(--indigo-color)",
-      "var(--blue-color)",
       "var(--light-blue-color)",
     ]
 
     if (!this.content) {
-      const title = this.config.title || 'Occupancy';
+      const title = this.config.title || '';
       this.innerHTML = `
         <ha-card header="${title}">
           <style>
@@ -135,8 +135,6 @@ class CalendarOccupancy extends HTMLElement {
   async _render(hass, entities) {
     const grid = await getData(hass, entities, this.config.past_weeks, this.config.future_weeks)
 
-    const monthName = "AAAA" //viewDate.locale(hass.locale?.language || undefined).format('MMMM YYYY');
-    this._titleEl.textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1);
     const dayNames = [
       "lun",
       "mar",
