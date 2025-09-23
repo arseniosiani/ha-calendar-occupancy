@@ -83,6 +83,8 @@ class CalendarOccupancy extends HTMLElement {
               background: ${colors[2]};
             }
             .block {
+              background-image: linear-gradient(45deg, #878787 25%, #636363 25%, #636363 50%, #878787 50%, #878787 75%, #636363 75%, #636363 100%);
+              background-size: 8.00px 8.00px;
               filter: brightness(0.75);
             }
             .bar_null {
