@@ -599,11 +599,13 @@ var loadEvents = async (hass, entities, grid) => {
           if (!grid[day].cals) {
             grid[day].cals = {};
           }
-          console.log(ev);
           const { summary } = ev;
-          let occupancy = "block";
-          if (summary.toLowerCase().match(/reserved/)) {
-            occupancy = "reserved";
+          let occupancy = "reserved";
+          if (entity_id.match(/airbnb/i)) {
+            occupancy = "block";
+            if (summary.toLowerCase().match(/reserved/)) {
+              occupancy = "reserved";
+            }
           }
           if (!grid[day].cals[entity_id]) {
             grid[day].cals[entity_id] = [];
@@ -618,7 +620,6 @@ var loadEvents = async (hass, entities, grid) => {
       }
     }
   }
-  console.log({ grid });
 };
 var getData = async (hass, entities, past_weeks, future_weeks) => {
   const grid = getGrid(past_weeks, future_weeks);

@@ -232,11 +232,14 @@ const loadEvents = async (hass, entities, grid) => {
             grid[day].cals = {}
           }
 
-          console.log(ev)
           const { summary } = ev
-          let occupancy = 'block'
-          if (summary.toLowerCase().match(/reserved/)) {
-            occupancy = 'reserved'
+          let occupancy = 'reserved'
+
+          if (entity_id.match(/airbnb/i)) {
+            occupancy = 'block'
+            if (summary.toLowerCase().match(/reserved/)) {
+              occupancy = 'reserved'
+            }
           }
 
           if (!grid[day].cals[entity_id]) {
@@ -252,7 +255,6 @@ const loadEvents = async (hass, entities, grid) => {
       }
     }
   }
-  console.log({ grid })
 }
 
 const getData = async (hass, entities, past_weeks, future_weeks) => {
