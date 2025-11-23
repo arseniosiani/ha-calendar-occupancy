@@ -31,7 +31,7 @@ class CalendarOccupancy extends HTMLElement {
     const colors = [
       "var(--red-color)",
       "var(--blue-color)",
-      "var(--pink-color)",
+      "var(--green-color)",
       "var(--purple-color)",
       "var(--deep-purple-color)",
       "var(--indigo-color)",
@@ -129,9 +129,8 @@ class CalendarOccupancy extends HTMLElement {
       `;
       this.content = this.querySelector('.calendar');
       this._titleEl = this.querySelector('.month-title');
+      this._render(hass, entities);
     }
-
-    this._render(hass, entities);
   }
 
   async _render(hass, entities) {
