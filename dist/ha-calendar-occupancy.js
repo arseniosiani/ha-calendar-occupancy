@@ -449,6 +449,7 @@ var CalendarOccupancy = class extends HTMLElement {
             .num { font-size: 0.95em; }
             .reserved {
               top: 20px;
+              height: 15px;
             }
             .cal_1 {
               background: ${colors[0]};
@@ -464,6 +465,7 @@ var CalendarOccupancy = class extends HTMLElement {
             }
             .block {
               top: 35px;
+              height: 11px;
               background-image: linear-gradient(45deg, #878787 25%, #636363 25%, #636363 50%, #878787 50%, #878787 75%, #636363 75%, #636363 100%);
               background-size: 8.00px 8.00px;
               filter: brightness(0.75);
