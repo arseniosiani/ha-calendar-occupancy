@@ -483,13 +483,11 @@ var CalendarOccupancy = class extends HTMLElement {
               position: absolute;
               left: -1px;
               width: 102%;
-              height: 15px;
             }
             .bar_enter {
               position: absolute;
               left: 55%;
               width: 46%;
-              height: 15px;
               border-top-left-radius: 4px;
               border-bottom-left-radius: 4px;
             }
@@ -497,7 +495,6 @@ var CalendarOccupancy = class extends HTMLElement {
               position: absolute;
               left: -1px;
               width: 45%;
-              height: 15px;
               border-top-right-radius: 4px;
               border-bottom-right-radius: 4px;
             }
