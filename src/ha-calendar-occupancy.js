@@ -75,12 +75,16 @@ class CalendarOccupancy extends HTMLElement {
               background: ${colors[0]};
             }
             .top_2 {
-              top: 30px;
+              top: 20px;
               background: ${colors[1]};
             }
             .top_3 {
-              top: 40px;
+              top: 20px;
               background: ${colors[2]};
+            }
+            .top_4 {
+              top: 20px;
+              background: ${colors[3]};
             }
             .block {
               background-image: linear-gradient(45deg, #878787 25%, #636363 25%, #636363 50%, #878787 50%, #878787 75%, #636363 75%, #636363 100%);
@@ -92,7 +96,7 @@ class CalendarOccupancy extends HTMLElement {
               left: -1px;
               bottom: 8px;
               width: 102%;
-              height: 8px;
+              height: 18px;
               background: none;
 
             }
@@ -101,14 +105,14 @@ class CalendarOccupancy extends HTMLElement {
               left: -1px;
               bottom: 8px;
               width: 102%;
-              height: 8px;
+              height: 18px;
             }
             .bar_enter {
               position: absolute;
               left: 55%;
               bottom: 8px;
               width: 46%;
-              height: 8px;
+              height: 18px;
               border-top-left-radius: 4px;
               border-bottom-left-radius: 4px;
             }
@@ -117,7 +121,7 @@ class CalendarOccupancy extends HTMLElement {
               left: -1px;
               bottom: 8px;
               width: 45%;
-              height: 8px;
+              height: 18px;
               border-top-right-radius: 4px;
               border-bottom-right-radius: 4px;
             }
