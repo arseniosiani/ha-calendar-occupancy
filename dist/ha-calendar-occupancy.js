@@ -409,7 +409,7 @@ var CalendarOccupancy = class extends HTMLElement {
     const colors = [
       "var(--red-color)",
       "var(--blue-color)",
-      "var(--pink-color)",
+      "var(--green-color)",
       "var(--purple-color)",
       "var(--deep-purple-color)",
       "var(--indigo-color)",
@@ -452,12 +452,16 @@ var CalendarOccupancy = class extends HTMLElement {
               background: ${colors[0]};
             }
             .top_2 {
-              top: 30px;
+              top: 20px;
               background: ${colors[1]};
             }
             .top_3 {
-              top: 40px;
+              top: 20px;
               background: ${colors[2]};
+            }
+            .top_4 {
+              top: 20px;
+              background: ${colors[3]};
             }
             .block {
               background-image: linear-gradient(45deg, #878787 25%, #636363 25%, #636363 50%, #878787 50%, #878787 75%, #636363 75%, #636363 100%);
@@ -469,7 +473,7 @@ var CalendarOccupancy = class extends HTMLElement {
               left: -1px;
               bottom: 8px;
               width: 102%;
-              height: 8px;
+              height: 18px;
               background: none;
 
             }
@@ -478,14 +482,14 @@ var CalendarOccupancy = class extends HTMLElement {
               left: -1px;
               bottom: 8px;
               width: 102%;
-              height: 8px;
+              height: 18px;
             }
             .bar_enter {
               position: absolute;
               left: 55%;
               bottom: 8px;
               width: 46%;
-              height: 8px;
+              height: 18px;
               border-top-left-radius: 4px;
               border-bottom-left-radius: 4px;
             }
@@ -494,7 +498,7 @@ var CalendarOccupancy = class extends HTMLElement {
               left: -1px;
               bottom: 8px;
               width: 45%;
-              height: 8px;
+              height: 18px;
               border-top-right-radius: 4px;
               border-bottom-right-radius: 4px;
             }
@@ -506,8 +510,8 @@ var CalendarOccupancy = class extends HTMLElement {
       `;
       this.content = this.querySelector(".calendar");
       this._titleEl = this.querySelector(".month-title");
+      this._render(hass, entities);
     }
-    this._render(hass, entities);
   }
   async _render(hass, entities) {
     const grid = await getData(hass, entities, this.config.past_weeks, this.config.future_weeks);
