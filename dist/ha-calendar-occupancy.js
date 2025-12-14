@@ -447,23 +447,23 @@ var CalendarOccupancy = class extends HTMLElement {
               background: var(--ha-color-primary-10);
             }
             .num { font-size: 0.95em; }
-            .top_1 {
+            .reserved {
               top: 20px;
+            }
+            .cal_1 {
               background: ${colors[0]};
             }
-            .top_2 {
-              top: 20px;
+            .cal_2 {
               background: ${colors[1]};
             }
-            .top_3 {
-              top: 20px;
+            .cal_3 {
               background: ${colors[2]};
             }
-            .top_4 {
-              top: 20px;
+            .cal_4 {
               background: ${colors[3]};
             }
             .block {
+              top: 35px;
               background-image: linear-gradient(45deg, #878787 25%, #636363 25%, #636363 50%, #878787 50%, #878787 75%, #636363 75%, #636363 100%);
               background-size: 8.00px 8.00px;
               filter: brightness(0.75);
@@ -480,25 +480,22 @@ var CalendarOccupancy = class extends HTMLElement {
             .bar_fill {
               position: absolute;
               left: -1px;
-              bottom: 8px;
               width: 102%;
-              height: 18px;
+              height: 15px;
             }
             .bar_enter {
               position: absolute;
               left: 55%;
-              bottom: 8px;
               width: 46%;
-              height: 18px;
+              height: 15px;
               border-top-left-radius: 4px;
               border-bottom-left-radius: 4px;
             }
             .bar_leave {
               position: absolute;
               left: -1px;
-              bottom: 8px;
               width: 45%;
-              height: 18px;
+              height: 15px;
               border-top-right-radius: 4px;
               border-bottom-right-radius: 4px;
             }
@@ -531,13 +528,10 @@ var CalendarOccupancy = class extends HTMLElement {
       let top = 0;
       for (const cal_id of entities) {
         top++;
-        if (!cals[cal_id]) {
-          bars.push(`<span class="bar_null top_${top}"></span>`);
-        }
         for (const piece of cals[cal_id] || []) {
           const fragment = piece.event;
           const { occupancy, summary } = piece;
-          bars.push(`<span class="bar_${fragment} top_${top} ${occupancy}" title="${summary}"></span>`);
+          bars.push(`<span class="bar_${fragment} cal_${top} ${occupancy}" title="${summary}"></span>`);
         }
       }
       const past = (0, import_dayjs.default)(date).format("YYMMDD") < (0, import_dayjs.default)().format("YYMMDD") ? "past" : "";
